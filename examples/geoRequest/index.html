@@ -70,7 +70,7 @@
                 infowindow.open(map);
             });
 
-            var censusKey =  prompt("Please enter your Census API key", "API Key");
+            var censusKey = '8c861b182b30876e406135671b1b124ad531873c'
             census.enable(censusKey);
 
             $('#clear').click(clear);
@@ -122,6 +122,15 @@
             });
         }
 
+        var myGeoJsonCallback = function(geojson) {
+            console.log(geojson);
+            //var my_values = JSON.parse(geojson);
+            var new_values = geojson.features.filter(function(item){return item.properties.median_house_construction_year > 1970;});
+            geojson.features = new_values;
+            checkLoading();
+            map.data.addGeoJson(geojson);
+        }
+
         function loadCity(city) {
             var reqLevel = level;
             if(city == "Montgomery_County_MD" && level == "place") {
@@ -146,10 +155,7 @@
                 request.container = (city == "Montgomery_County_MD") ? "county" : "place";
             }
 
-            census.GEORequest(request, function(geojson) {
-                checkLoading();
-                map.data.addGeoJson(geojson);
-            });
+            census.GEORequest(request, myGeoJsonCallback);
             //END CITYSDK REQUEST
         }
     </script>
@@ -199,6 +205,7 @@
         <div class="button off" id="commute_timeButton" onclick="toggleVar('commute_time')">Total Commute Time</div>
         <div class="button off" id="median_male_ageButton" onclick="toggleVar('median_male_age')">Median Male Age</div>
         <div class="button off" id="median_female_ageButton" onclick="toggleVar('median_female_age')">Median Female Age</div>
+        <div class="button off" id="median_house_construction_yearButton" onclick="toggleVar('median_house_construction_year')">median_house year</div>
     </div>
 </div>
 <div id="time-panel-2">
