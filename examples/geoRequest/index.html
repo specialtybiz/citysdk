@@ -156,6 +156,15 @@
 
         }
 
+        var Reset = function(){
+
+            features.map(function(geojson){map.data.remove(geojson)});
+
+            checkLoading();
+            features = map.data.addGeoJson(original_geojson);
+
+        }
+
         var myGeoJsonCallback = function(geojson) {
             console.log('FIRST PASS:',geojson);
 
@@ -172,6 +181,7 @@
         }
 
         function loadCity(city) {
+            setLevel('blockGroup');
             var reqLevel = level;
             if(city == "Montgomery_County_MD" && level == "place") {
                 reqLevel = "county";
@@ -272,6 +282,7 @@
 -->
 
 <div id="time-panel-2">
+<!--
     <div>
         <div class="button on" id="blockGroup" onclick="setLevel('blockGroup')">Block Groups</div>
         <div class="button off" id="tract" onclick="setLevel('tract')">Tracts</div>
@@ -280,6 +291,15 @@
             Clear
         </div>
     </div>
+
+    <div>
+        <div class="button" id="reset" onclick="Reset()">
+            Show All
+        </div>
+    </div>
+
+-->
+
     <div>
         <div class="button on" id="filterAge" onclick="filterAge()">Filter Age: 25-45</div>
         <div class="button on" id="filterIncome" onclick="filterIncome()">Filter Income: 60-150K</div>
