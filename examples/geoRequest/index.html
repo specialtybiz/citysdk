@@ -14,6 +14,10 @@
         var sdk = new CitySDK();
         var census = sdk.modules.census;
 
+        var original_geojson;
+        var filtered_geojson;
+        var features;
+
         var geoCities = {
             "Asheville_NC": [35.5800, -82.5558],
             "Austin_TX": [30.2500, -97.7500],
@@ -122,13 +126,49 @@
             });
         }
 
-        var myGeoJsonCallback = function(geojson) {
-            console.log(geojson);
-            //var my_values = JSON.parse(geojson);
-            var new_values = geojson.features.filter(function(item){return item.properties.median_house_construction_year > 1970;});
-            geojson.features = new_values;
+        var filterIncome = function(){
+
+            var new_values = filtered_geojson.features.filter(function(item){return item.properties.income_per_capita > 60000 && item.properties.income_per_capita < 150000;});
+
+            filtered_geojson.features = new_values;
+
+            //original_geojson.features.map(function(geojson){map.data.remove(geojson)});
+
+            features.map(function(geojson){map.data.remove(geojson)});
+
             checkLoading();
-            map.data.addGeoJson(geojson);
+            features = map.data.addGeoJson(filtered_geojson);
+
+        }
+
+        var filterAge = function(){
+
+            var new_values = filtered_geojson.features.filter(function(item){return item.properties.age > 25 && item.properties.age < 45;});
+
+            filtered_geojson.features = new_values;
+
+            //original_geojson.features.map(function(geojson){map.data.remove(geojson)});
+
+            features.map(function(geojson){map.data.remove(geojson)});
+
+            checkLoading();
+            features = map.data.addGeoJson(filtered_geojson);
+
+        }
+
+        var myGeoJsonCallback = function(geojson) {
+            console.log('FIRST PASS:',geojson);
+
+            //var my_values = JSON.parse(geojson);
+
+            original_geojson = filtered_geojson = geojson;
+
+            //var new_values = geojson.features.filter(function(item){return item.properties.median_house_construction_year > 1970;});
+            //geojson.features = new_values;
+
+            checkLoading();
+
+            features = map.data.addGeoJson(original_geojson);
         }
 
         function loadCity(city) {
@@ -142,18 +182,38 @@
             $('#loading').append('<img src="loading.gif"/><br/>Loading features...');
             $('#loading').css('display', 'block');
 
+            //console.log(variables);
+
+            variables = ["income_per_capita","employment_employed","age","population","median_male_age","median_female_age","median_gross_rent","median_home_value","education_bachelors"];
+
             //BEGIN CITYSDK REQUEST
             var request = {
                 "lat": geoCities[city][0],
                 "lng": geoCities[city][1],
                 "level": reqLevel,
+
+                //"state": "DE",
+                //"level": "state",
+                //"sublevel": true,
+
+                //"state": "DE",
+                //"sublevel": "true",
+                //"level": "blockGroup",
+                //"container": "state",
+
+                //"level": "us",
+                //"sublevel": true,
+
                 "variables": variables
             };
 
+
+            /***/
             if(reqLevel == "tract" || reqLevel == "blockGroup") {
                 request.sublevel = true;
                 request.container = (city == "Montgomery_County_MD") ? "county" : "place";
             }
+            /***/
 
             census.GEORequest(request, myGeoJsonCallback);
             //END CITYSDK REQUEST
@@ -197,6 +257,7 @@
         Asheville, NC
     </div>
 </div>
+<!--
 <div id="time-panel">
     <div>
         <div class="button off" id="incomeButton" onclick="toggleVar('income')">Median Income</div>
@@ -208,16 +269,25 @@
         <div class="button off" id="median_house_construction_yearButton" onclick="toggleVar('median_house_construction_year')">median_house year</div>
     </div>
 </div>
+-->
+
 <div id="time-panel-2">
     <div>
-        <div class="button off" id="blockGroup" onclick="setLevel('blockGroup')">Block Groups</div>
+        <div class="button on" id="blockGroup" onclick="setLevel('blockGroup')">Block Groups</div>
         <div class="button off" id="tract" onclick="setLevel('tract')">Tracts</div>
         <div class="button" id="place" onclick="setLevel('place')">Place</div>
         <div class="button" id="clear" style="margin-right: 0.75em;">
             Clear
         </div>
     </div>
+    <div>
+        <div class="button on" id="filterAge" onclick="filterAge()">Filter Age: 25-45</div>
+        <div class="button on" id="filterIncome" onclick="filterIncome()">Filter Income: 60-150K</div>
+    </div>
 </div>
+
+
+
 <div id="loading">
 </div>
 </body>
